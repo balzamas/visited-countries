@@ -51,11 +51,22 @@
 
     // Color scheme based on visit count
     function getColor(visits) {
-      return visits === 1 ? '#ffeda0' :
-             visits === 2 ? '#feb24c' :
-             visits === 3 ? '#fd8d3c' :
-             visits <= 6 ? '#f03b20' :
-             '#bd0026'; // More than 6 times
+      // Color scheme based on visit count
+function getColor(visits) {
+  if (visits === 0 || visits == null) {
+    return '#d3d3d3'; // Gray color for no visits
+  } else if (visits === 1) {
+    return '#ffeda0'; // Light color for 1 visit
+  } else if (visits === 2) {
+    return '#feb24c'; // Slightly darker for 2 visits
+  } else if (visits === 3) {
+    return '#fd8d3c'; // Darker for 3 visits
+  } else if (visits <= 6) {
+    return '#f03b20'; // Red for 4-6 visits
+  } else {
+    return '#bd0026'; // Dark red for more than 6 visits
+  }
+}
     }
 
     // Style function for each country
