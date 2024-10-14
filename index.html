@@ -137,20 +137,20 @@
     }
 
     // Add a legend to the map
-    var legend = L.control({ position: 'topleft' });
+    var legend = L.control({ position: 'topright' });
 
     legend.onAdd = function (map) {
       var div = L.DomUtil.create('div', 'legend'),
           grades = [0, 1, 2, 3, 4, 7],
-          labels = ['No visits', '1 visit', '2 visits', '3 visits', '4-6 visits', 'More than 6 visits'];
+          labels = ['None', '1x', '2x', '3x', '4-6x', '>6x'];
 
-      div.innerHTML += '<h4>Visits Legend</h4>';
+      div.innerHTML += '<h4>Visits</h4>';
 
       // Loop through visit levels and generate a label with a colored square for each interval
       for (var i = 0; i < grades.length; i++) {
         div.innerHTML +=
           '<i style="background:' + getColor(grades[i]) + '"></i> ' +
-          labels[i] + ' / ';
+          labels[i] + '<br>';
       }
 
       return div;
