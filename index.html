@@ -64,19 +64,6 @@ L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg', 
   attribution: 'Map tiles by Stamen Design, CC BY 3.0 — Map data © OpenStreetMap contributors'
 }).addTo(map);
 
-var printer = L.easyPrint({
-  tileLayer: yourTileLayer, // You can specify your map's tile layer
-  sizeModes: ['Current', 'A4Portrait', 'A4Landscape'],
-  filename: 'MyMap',
-  exportOnly: true, // This prevents direct printing and lets you export
-  hideControlContainer: true // Hides the Leaflet control container in the exported image
-}).addTo(map);
-
-// Optional: Trigger the print button programmatically
-function exportMap() {
-  printer.printMap('CurrentSize', 'MyMap'); // You can use 'A4Portrait' or 'A4Landscape' too
-}
-
     // A sample GeoJSON with country borders for Europe
     var geojsonUrl = 'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson'; // or use a Europe-specific GeoJSON
 
