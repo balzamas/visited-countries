@@ -55,10 +55,9 @@
     // Initialize the map
     var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
 
-// Load a tile layer for the map (minimal text or no text)
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-  maxZoom: 6,
-  attribution: '© OpenStreetMap contributors © CARTO'
+L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg', {
+  maxZoom: 18,
+  attribution: 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.'
 }).addTo(map);
 
     // A sample GeoJSON with country borders for Europe
