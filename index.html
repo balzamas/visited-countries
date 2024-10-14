@@ -21,13 +21,18 @@
       font-size: 14px;
       line-height: 18px;
       color: #555;
+      display: flex;
+      align-items: center;
     }
     .legend i {
       width: 18px;
       height: 18px;
-      float: left;
+      display: inline-block;
       margin-right: 8px;
       opacity: 0.7;
+    }
+    .legend span {
+      margin-right: 15px;
     }
     button {
       display: inline-block;
@@ -99,6 +104,11 @@
         // Assign a unique ID to each country feature if not already present
         data.features.forEach((feature, index) => {
           feature.properties.id = index; // Assign a unique ID to each feature
+          // Load visits data from localStorage
+          var savedVisits = localStorage.getItem('country_' + feature.properties.id);
+          if (savedVisits !== null) {
+            feature.properties.visits = parseInt(savedVisits);
+          }
         });
         geojsonLayer = L.geoJson(data, {
           style: style,
@@ -112,6 +122,8 @@
         if (layer.feature.properties.id === countryId) {
           layer.feature.properties.visits = visits;
           layer.setStyle(style(layer.feature)); // Update the style based on the new visits count
+          // Store the visits data in localStorage
+          localStorage.setItem('country_' + countryId, visits);
           layer.closePopup(); // Close the popup after selection
         }
       });
@@ -131,32 +143,4 @@
             '<button onclick="setVisits(' + feature.properties.id + ', 7)">More than 6 visits</button>' +
             '</div>';
 
-          layer.bindPopup(popupContent).openPopup();
-        }
-      });
-    }
-
-    // Add a legend to the map
-    var legend = L.control({ position: 'topright' });
-
-    legend.onAdd = function (map) {
-      var div = L.DomUtil.create('div', 'legend'),
-          grades = [0, 1, 2, 3, 4, 7],
-          labels = ['None', '1x', '2x', '3x', '4-6x', '>6x'];
-
-      div.innerHTML += '<h4>Visits</h4>';
-
-      // Loop through visit levels and generate a label with a colored square for each interval
-      for (var i = 0; i < grades.length; i++) {
-        div.innerHTML +=
-          '<i style="background:' + getColor(grades[i]) + '"></i> ' +
-          labels[i] + '<br>';
-      }
-
-      return div;
-    };
-
-    legend.addTo(map);
-  </script>
-</body>
-</html>
+          layer.bindPopup(popupContent).
