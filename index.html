@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+    }
+    #map {
+      width: 70%;
+      height: 600px;
+    }
+    #country-list {
+      width: 30%;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: #f7f7f7;
+    }
+    .country-item {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="country-list">
+    <h3>Select Countries</h3>
+    <!-- The country list will be here -->
+    <div id="countries"></div>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-geojson-eu"></script> <!-- Example of GeoJSON map -->
+  <script>
+    // Initialize the map
+    var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
+
+    // Load a tile layer for the map
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 6,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // A sample GeoJSON with country borders for Europe
+    var geojsonUrl = 'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson'; // or use a Europe-specific GeoJSON
+
+    // Color scheme based on visit count
+    function getColor(visits) {
+      return visits === 1 ? '#ffeda0' :
+             visits === 2 ? '#feb24c' :
+             visits === 3 ? '#fd8d3c' :
+             visits <= 6 ? '#f03b20' :
+             '#bd0026'; // More than 6 times
+    }
+
+    // Style function for each country
+    function style(feature) {
+      var visits = feature.properties.visits || 0;
+      return {
+        fillColor: getColor(visits),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7
+      };
+    }
+
+    // Add GeoJSON to the map
+    var geojsonLayer;
+    fetch(geojsonUrl)
+      .then(response => response.json())
+      .then(data => {
+        geojsonLayer = L.geoJson(data, {
+          style: style,
+          onEachFeature: onEachFeature
+        }).addTo(map);
+
+        populateCountryList(data.features);
+      });
+
+    // When a country is clicked, allow the user to select how many times they visited
+    function onEachFeature(feature, layer) {
+      layer.on({
+        click: function (e) {
+          var visits = prompt('How many times have you visited ' + feature.properties.name + '? (Enter a number)');
+          if (visits != null) {
+            visits = parseInt(visits);
+            feature.properties.visits = visits; // Store the number of visits
+            layer.setStyle(style(feature)); // Update the map style
+          }
+        }
+      });
+    }
+
+    // Populate the country list with clickable options
+    function populateCountryList(countries) {
+      var list = document.getElementById('countries');
+      countries.forEach(function(country) {
+        var div = document.createElement('div');
+        div.classList.add('country-item');
+        div.textContent = country.properties.name;
+        div.addEventListener('click', function() {
+          alert('Select this country on the map to add visit information!');
+        });
+        list.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
