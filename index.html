@@ -29,6 +29,18 @@
       margin-right: 8px;
       opacity: 0.7;
     }
+    button {
+      display: inline-block;
+      margin: 4px;
+      padding: 6px 12px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #ddd;
+    }
   </style>
 </head>
 <body>
@@ -84,22 +96,42 @@
     fetch(geojsonUrl)
       .then(response => response.json())
       .then(data => {
+        // Assign a unique ID to each country feature if not already present
+        data.features.forEach((feature, index) => {
+          feature.properties.id = index; // Assign a unique ID to each feature
+        });
         geojsonLayer = L.geoJson(data, {
           style: style,
           onEachFeature: onEachFeature
         }).addTo(map);
       });
 
+    // Function to set the number of visits and update the map
+    function setVisits(countryId, visits) {
+      geojsonLayer.eachLayer(function (layer) {
+        if (layer.feature.properties.id === countryId) {
+          layer.feature.properties.visits = visits;
+          layer.setStyle(style(layer.feature)); // Update the style based on the new visits count
+          layer.closePopup(); // Close the popup after selection
+        }
+      });
+    }
+
     // When a country is clicked, allow the user to select how many times they visited
     function onEachFeature(feature, layer) {
       layer.on({
         click: function (e) {
-          var visits = prompt('How many times have you visited ' + feature.properties.name + '? (Enter a number)');
-          if (visits != null) {
-            visits = parseInt(visits);
-            feature.properties.visits = visits; // Store the number of visits
-            layer.setStyle(style(feature)); // Update the map style
-          }
+          var popupContent = '<div><strong>' + feature.properties.name + '</strong><br>' +
+            'How many times have you visited?<br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 0)">No visits</button><br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 1)">1 visit</button><br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 2)">2 visits</button><br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 3)">3 visits</button><br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 4)">4-6 visits</button><br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 7)">More than 6 visits</button>' +
+            '</div>';
+
+          layer.bindPopup(popupContent).openPopup();
         }
       });
     }
