@@ -21,18 +21,16 @@
       font-size: 14px;
       line-height: 18px;
       color: #555;
-      display: flex;
-      align-items: center;
     }
     .legend i {
       width: 18px;
       height: 18px;
-      display: inline-block;
+      display: inline-block;  /* Ensure color squares display inline with the text */
       margin-right: 8px;
       opacity: 0.7;
     }
-    .legend span {
-      margin-right: 15px;
+    .legend label {
+      display: block;  /* Ensure each label is on its own line */
     }
     button {
       display: inline-block;
@@ -161,8 +159,8 @@
       // Loop through visit levels and generate a label with a colored square for each interval
       for (var i = 0; i < grades.length; i++) {
         div.innerHTML +=
-          '<i style="background:' + getColor(grades[i]) + '"></i> ' +
-          labels[i] + '<br>';
+          '<label><i style="background:' + getColor(grades[i]) + '"></i> ' +
+          labels[i] + '</label>';
       }
 
       return div;
