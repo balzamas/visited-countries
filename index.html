@@ -107,7 +107,7 @@
           // Load visits data from localStorage
           var savedVisits = localStorage.getItem('country_' + feature.properties.id);
           if (savedVisits !== null) {
-            feature.properties.visits = parseInt(savedVisits);
+            feature.properties.visits = parseInt(savedVisits); // Set the visits from storage
           }
         });
         geojsonLayer = L.geoJson(data, {
@@ -143,4 +143,32 @@
             '<button onclick="setVisits(' + feature.properties.id + ', 7)">More than 6 visits</button>' +
             '</div>';
 
-          layer.bindPopup(popupContent).
+          layer.bindPopup(popupContent).openPopup();
+        }
+      });
+    }
+
+    // Add a legend to the map
+    var legend = L.control({ position: 'topleft' });
+
+    legend.onAdd = function (map) {
+      var div = L.DomUtil.create('div', 'legend'),
+          grades = [0, 1, 2, 3, 4, 7],
+          labels = ['None', '1x', '2x', '3x', '4-6x', '>6x'];
+
+      div.innerHTML += '<h4>Visits</h4>';
+
+      // Loop through visit levels and generate a label with a colored square for each interval
+      for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+          '<i style="background:' + getColor(grades[i]) + '"></i> ' +
+          '<span>' + labels[i] + '</span>';
+      }
+
+      return div;
+    };
+
+    legend.addTo(map);
+  </script>
+</body>
+</html>
