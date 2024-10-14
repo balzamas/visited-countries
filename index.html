@@ -137,7 +137,7 @@
     }
 
     // Add a legend to the map
-    var legend = L.control({ position: 'topright' });
+    var legend = L.control({ position: 'topleft' });
 
     legend.onAdd = function (map) {
       var div = L.DomUtil.create('div', 'legend'),
@@ -150,7 +150,7 @@
       for (var i = 0; i < grades.length; i++) {
         div.innerHTML +=
           '<i style="background:' + getColor(grades[i]) + '"></i> ' +
-          labels[i] + '<br>';
+          labels[i] + ' / ';
       }
 
       return div;
