@@ -64,6 +64,21 @@ L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg', 
   attribution: 'Map tiles by Stamen Design, CC BY 3.0 — Map data © OpenStreetMap contributors'
 }).addTo(map);
 
+// Add EasyPrint control to the map (this is where the EasyPrint functionality goes)
+    var printer = L.easyPrint({
+      tileLayer: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'), // the same tile layer as in the map
+      sizeModes: ['Current', 'A4Portrait', 'A4Landscape'], // Options for different print sizes
+      filename: 'MyMap', // File name when saved
+      exportOnly: true, // Prevents direct print, just exports as an image
+      hideControlContainer: true // Hides the map controls (zoom buttons, etc.) during export
+    }).addTo(map);
+
+    // Optional: Add a button to trigger the export functionality
+    function exportMap() {
+      printer.printMap('CurrentSize', 'MyMap');
+    }
+
+
     // A sample GeoJSON with country borders for Europe
     var geojsonUrl = 'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson'; // or use a Europe-specific GeoJSON
 
