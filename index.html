@@ -55,11 +55,11 @@
     // Initialize the map
     var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
 
-    // Load a tile layer for the map
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 6,
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
+// Load a tile layer for the map (minimal text or no text)
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+  maxZoom: 6,
+  attribution: '© OpenStreetMap contributors © CARTO'
+}).addTo(map);
 
     // A sample GeoJSON with country borders for Europe
     var geojsonUrl = 'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson'; // or use a Europe-specific GeoJSON
