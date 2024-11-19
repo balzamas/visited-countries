@@ -91,9 +91,10 @@
 
     // Add EasyPrint control to the map
     var printer = L.easyPrint({
-      sizeModes: ['Current'], // Adjust to current view
+      sizeModes: ['A4Landscape'], // Choose a preset size or try 'Current' for current map view
       filename: 'TravelMap',
-      exportOnly: true // Ensures that the button triggers an export only
+      exportOnly: true, // Ensures that the button triggers an export only
+      hidden: true // Makes the plugin work silently in the background without extra controls
     }).addTo(map);
 
     // Trigger the export of the current view as an image
