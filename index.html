@@ -53,7 +53,6 @@
   </style>
 </head>
 <body>
-  <button class="export-btn" onclick="exportMap()">Export Map as Image</button>
   <div id="map"></div>
 
   <!-- Include Leaflet and Leaflet.BigImage -->
@@ -166,19 +165,6 @@
     };
     legend.addTo(map);
 
-    // Set up the exportMap function using Leaflet.BigImage
-    function exportMap() {
-      L.bigImage({
-        dpi: 300,
-        outputFormat: 'image/png',
-        fileName: 'TravelMap.png'
-      }).printMap(map).then((blob) => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'TravelMap.png';
-        link.click();
-      });
-    }
   </script>
 </body>
 </html>
