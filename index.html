@@ -59,7 +59,7 @@
   <!-- Include Leaflet and Leaflet.BigImage -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="Leaflet.BigImage.min.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     // Initialize the map
     var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
@@ -167,18 +167,48 @@
     legend.addTo(map);
 
     // Set up the exportMap function using Leaflet.BigImage
-    function exportMap() {
-      L.bigImage({
-        dpi: 300,
-        outputFormat: 'image/png',
-        fileName: 'TravelMap.png'
-      }).printMap(map).then((blob) => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'TravelMap.png';
-        link.click();
+function exportMap() {
+  // Use Leaflet.BigImage to capture the map image
+  L.bigImage({
+    dpi: 300,
+    outputFormat: 'image/png',
+    fileName: 'TravelMap.png'
+  }).printMap(map).then((mapBlob) => {
+    // Create an image element to load the map blob
+    const mapImg = new Image();
+    mapImg.src = URL.createObjectURL(mapBlob);
+
+    mapImg.onload = () => {
+      // Capture the legend separately with html2canvas
+      const legendContainer = document.querySelector('.legend');
+      
+      html2canvas(legendContainer, { useCORS: true }).then((legendCanvas) => {
+        // Set up a new canvas to combine both images
+        const combinedCanvas = document.createElement('canvas');
+        combinedCanvas.width = mapImg.width;
+        combinedCanvas.height = mapImg.height;
+        const ctx = combinedCanvas.getContext('2d');
+
+        // Draw the map image onto the combined canvas
+        ctx.drawImage(mapImg, 0, 0);
+
+        // Position the legend onto the map canvas
+        const legendX = mapImg.width - legendCanvas.width - 20; // Positioning on the right
+        const legendY = 20; // Positioning at the top
+        ctx.drawImage(legendCanvas, legendX, legendY);
+
+        // Export the final combined image
+        combinedCanvas.toBlob((combinedBlob) => {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(combinedBlob);
+          link.download = 'TravelMapWithLegend.png';
+          link.click();
+        });
       });
-    }
+    };
+  });
+}
+
   </script>
 </body>
 </html>
