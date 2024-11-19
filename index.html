@@ -56,14 +56,6 @@
     .export-btn:hover {
       background-color: #45a049;
     }
-    /* Hide the default leaflet-easyPrint button */
-    .leaflet-control-easyPrint-button {
-      display: none !important;
-    }
-    /* Move the zoom controls down */
-    .leaflet-top.leaflet-left .leaflet-control-zoom {
-      margin-top: 60px !important; /* Adjust this value as needed */
-    }
   </style>
 </head>
 <body>
@@ -80,8 +72,10 @@
     </div>
   </div>
 
+  <!-- Include Leaflet and Leaflet.BigImage -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <script src="https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-bigimage@1.0.0/dist/Leaflet.BigImage.min.js"></script>
+
   <script>
     // Initialize the map
     var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
@@ -90,39 +84,6 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-
-    // Add EasyPrint control to the map
-    var printer = L.easyPrint({
-      sizeModes: ['Current'], // Choose a preset size or try 'Current' for current map view
-      filename: 'TravelMap',
-      exportOnly: true, // Ensures that the button triggers an export only
-      hidden: true // Makes the plugin work silently in the background without extra controls
-    }).addTo(map);
-
-    // Trigger the export of the current view as an image
-//   function exportMap() {
-//      printer.printMap('CurrentSize', 'TravelMap');
-//    }
-
-function exportMap() {
-  printer.printMap('CurrentSize', 'TravelMap', function(canvas) {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const trimmedCanvas = document.createElement('canvas');
-    const ctx = trimmedCanvas.getContext('2d');
-
-    trimmedCanvas.width = viewportWidth;
-    trimmedCanvas.height = viewportHeight;
-    ctx.drawImage(canvas, 0, 0, viewportWidth, viewportHeight, 0, 0, viewportWidth, viewportHeight);
-
-    const link = document.createElement('a');
-    link.download = 'CroppedTravelMap.png';
-    link.href = trimmedCanvas.toDataURL(); // Get the cropped image data URL
-    link.click(); // Download the cropped image
-  });
-}
-
-
 
     // Color scheme based on visit count
     function getColor(visits) {
@@ -150,7 +111,7 @@ function exportMap() {
         opacity: 1,
         color: 'white',
         dashArray: '3',
-        fillOpacity: 0.7 // Fully opaque
+        fillOpacity: 0.7
       };
     }
 
@@ -160,9 +121,8 @@ function exportMap() {
         if (layer.feature.properties.id === countryId) {
           layer.feature.properties.visits = visits;
           layer.setStyle(style(layer.feature)); // Update the style based on the new visits count
-          // Store the visits data in localStorage
           localStorage.setItem('country_' + countryId, visits);
-          layer.closePopup(); // Close the popup after selection
+          layer.closePopup();
         }
       });
     }
@@ -192,7 +152,6 @@ function exportMap() {
     fetch(geojsonUrl)
       .then(response => response.json())
       .then(data => {
-        // Assign unique IDs and load visits data from localStorage
         data.features.forEach((feature, index) => {
           feature.properties.id = index;
           var savedVisits = localStorage.getItem('country_' + feature.properties.id);
@@ -205,6 +164,20 @@ function exportMap() {
           onEachFeature: onEachFeature
         }).addTo(map);
       });
+
+    // Set up the exportMap function using Leaflet.BigImage
+    function exportMap() {
+      L.bigImage({
+        dpi: 300,
+        outputFormat: 'image/png',
+        fileName: 'TravelMap.png'
+      }).printMap(map).then((blob) => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'TravelMap.png';
+        link.click();
+      });
+    }
   </script>
 </body>
 </html>
