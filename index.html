@@ -59,9 +59,10 @@
     // Initialize the map
     var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
 
-L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg', {
-  attribution: 'Map tiles by Stamen Design, CC BY 3.0 — Map data © OpenStreetMap contributors'
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
+
 
 // Add EasyPrint control to the map (this is where the EasyPrint functionality goes)
     var printer = L.easyPrint({
