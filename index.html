@@ -41,6 +41,13 @@
     .legend label {
       display: block;
     }
+    /* Ensuring the legend is visible during print */
+    @media print {
+      .legend {
+        position: static;
+        display: block;
+      }
+    }
   </style>
 </head>
 <body>
@@ -149,11 +156,20 @@
         }).addTo(map);
       });
 
-    // Add the browser print control to the map
+    // Add the browser print control to the map and include the legend in the print view
     L.control.browserPrint({
       title: 'Export Map as Image', // Tooltip text for the button
       printModes: ["Portrait", "Landscape", "Auto", "Custom"], // Available print modes
-      closePopupsOnPrint: true // Close any open popups before printing
+      closePopupsOnPrint: true, // Close any open popups before printing
+      printObjects: {
+        printLayer: map, // The map layer to print
+        printElements: [
+          {
+            html: document.querySelector('.legend'), // Include the legend in the print view
+            useOverlay: true // Make sure the legend overlays on the map when printed
+          }
+        ]
+      }
     }).addTo(map);
   </script>
 </body>
