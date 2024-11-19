@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Travel Map with Printable Legend</title>
+  <title>Downloadable Map with Legend</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <style>
     body, html, #map {
@@ -34,9 +34,10 @@
 
   <div id="map"></div>
 
-  <!-- Include Leaflet and leaflet.browser.print -->
+  <!-- Include Leaflet, leaflet.browser.print, and dom-to-image -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.browser.print/dist/leaflet.browser.print.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/src/dom-to-image.min.js"></script>
 
   <script>
     // Initialize the map
@@ -71,13 +72,28 @@
     }
     L.control.legend({ position: 'bottomright' }).addTo(map);
 
-    // Add browser print control and include the legend in the print view
-    L.control.browserPrint().addTo(map);
+    // Define the function to save the map as an image
+    var saveAsImage = function () {
+      return domtoimage.toPng(document.getElementById('map'))
+        .then(function (dataUrl) {
+          var link = document.createElement('a');
+          link.download = map.printControl.options.documentTitle || "exportedMap.png";
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch(function (error) {
+          console.error('Error exporting map as PNG:', error);
+        });
+    };
 
-    // Add the legend to the print map when printing starts
-    map.on("browser-print-start", function(e){
-      L.control.legend({ position: 'bottomright' }).addTo(e.printMap);
-    });
+    // Add browser print control with custom print function for saving as PNG
+    L.control.browserPrint({
+      documentTitle: "printImage",
+      printModes: [
+        L.BrowserPrint.Mode.Auto("Download PNG"),
+      ],
+      printFunction: saveAsImage
+    }).addTo(map);
   </script>
 
 </body>
