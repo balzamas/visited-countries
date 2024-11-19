@@ -93,10 +93,6 @@
       printer.printMap('CurrentSize', 'TravelMap');
     }
 
-
-    // A sample GeoJSON with country borders for Europe
-    var geojsonUrl = 'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson'; // or use a Europe-specific GeoJSON
-
     // Color scheme based on visit count
     function getColor(visits) {
       if (visits === 0 || visits == null) {
@@ -126,26 +122,6 @@
         fillOpacity: 0.7 // Fully opaque
       };
     }
-
-    // Add GeoJSON to the map
-    var geojsonLayer;
-    fetch(geojsonUrl)
-      .then(response => response.json())
-      .then(data => {
-        // Assign a unique ID to each country feature if not already present
-        data.features.forEach((feature, index) => {
-          feature.properties.id = index; // Assign a unique ID to each feature
-          // Load visits data from localStorage
-          var savedVisits = localStorage.getItem('country_' + feature.properties.id);
-          if (savedVisits !== null) {
-            feature.properties.visits = parseInt(savedVisits); // Set the visits from storage
-          }
-        });
-        geojsonLayer = L.geoJson(data, {
-          style: style,
-          onEachFeature: onEachFeature
-        }).addTo(map);
-      });
 
     // Function to set the number of visits and update the map
     function setVisits(countryId, visits) {
@@ -179,7 +155,25 @@
       });
     }
 
-
+    // Load GeoJSON data and add to the map
+    var geojsonUrl = 'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson';
+    var geojsonLayer;
+    fetch(geojsonUrl)
+      .then(response => response.json())
+      .then(data => {
+        // Assign unique IDs and load visits data from localStorage
+        data.features.forEach((feature, index) => {
+          feature.properties.id = index;
+          var savedVisits = localStorage.getItem('country_' + feature.properties.id);
+          if (savedVisits !== null) {
+            feature.properties.visits = parseInt(savedVisits);
+          }
+        });
+        geojsonLayer = L.geoJson(data, {
+          style: style,
+          onEachFeature: onEachFeature
+        }).addTo(map);
+      });
   </script>
 </body>
 </html>
