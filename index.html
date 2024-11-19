@@ -1,100 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Downloadable Map with Legend</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-  <style>
-    body, html, #map {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-    .legend {
-      background-color: white;
-      padding: 10px;
-      font-size: 14px;
-      line-height: 18px;
-      color: #555;
-      border-radius: 5px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    }
-    .legend i {
-      width: 18px;
-      height: 18px;
-      display: inline-block;
-      margin-right: 8px;
-      opacity: 0.7;
-    }
-  </style>
+	<meta charset="utf-8" />
+	<title>Leaflet Browser Print Plugin | Save as PNG</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+	<script src="https://unpkg.com/leaflet.browser.print/dist/leaflet.browser.print.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
+	<style>
+		html, body, #map {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+		}
+		.legend {
+			background-color: white;
+			padding: 10px;
+			font-size: 14px;
+			line-height: 18px;
+			color: #555;
+			border-radius: 5px;
+			box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+		}
+		.legend i {
+			width: 18px;
+			height: 18px;
+			display: inline-block;
+			margin-right: 8px;
+			opacity: 0.7;
+		}
+	</style>
 </head>
 <body>
 
-  <div id="map"></div>
+	<div id="map"></div>
 
-  <!-- Include Leaflet, leaflet.browser.print, and dom-to-image -->
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.browser.print/dist/leaflet.browser.print.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/src/dom-to-image.min.js"></script>
+	<script>
+		var map = L.map("map").setView([37.8, -96], 4);
 
-  <script>
-    // Initialize the map
-    var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
+		// Add a tile layer
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+		}).addTo(map);
 
-    // Tile layer for the map
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+		// Define a custom legend control
+		L.Control.Legend = L.Control.extend({
+			onAdd: function() {
+				var div = L.DomUtil.create('div', 'legend');
+				div.innerHTML = `
+					<b>Visits:</b><br>
+					<div><i style="background:#d3d3d3"></i> None</div>
+					<div><i style="background:#ffeda0"></i> 1x</div>
+					<div><i style="background:#feb24c"></i> 2x</div>
+					<div><i style="background:#fd8d3c"></i> 3x</div>
+					<div><i style="background:#f03b20"></i> 4-6x</div>
+					<div><i style="background:#bd0026"></i> >6x</div>
+				`;
+				return div;
+			}
+		});
 
-    // Define a custom legend control
-    L.Control.Legend = L.Control.extend({
-      onAdd: function() {
-        var div = L.DomUtil.create('div', 'legend');
-        div.innerHTML = `
-          <b>Visits:</b><br>
-          <div><i style="background:#d3d3d3"></i> None</div>
-          <div><i style="background:#ffeda0"></i> 1x</div>
-          <div><i style="background:#feb24c"></i> 2x</div>
-          <div><i style="background:#fd8d3c"></i> 3x</div>
-          <div><i style="background:#f03b20"></i> 4-6x</div>
-          <div><i style="background:#bd0026"></i> >6x</div>
-        `;
-        return div;
-      },
-      onRemove: function() {}
-    });
+		// Add the legend to the map
+		L.control.legend = function(opts) {
+			return new L.Control.Legend(opts);
+		}
+		L.control.legend({ position: 'bottomright' }).addTo(map);
 
-    // Add the legend to the map
-    L.control.legend = function(opts) {
-      return new L.Control.Legend(opts);
-    }
-    L.control.legend({ position: 'bottomright' }).addTo(map);
+		// Define the function to save the map as an image
+		var saveAsImage = function () {
+			return domtoimage.toPng(document.getElementById('map'))
+				.then(function (dataUrl) {
+					var link = document.createElement('a');
+					link.download = "exportedMap.png";
+					link.href = dataUrl;
+					link.click();
+				})
+				.catch(function (error) {
+					console.error('Error exporting map as PNG:', error);
+				});
+		};
 
-    // Define the function to save the map as an image
-    var saveAsImage = function () {
-      return domtoimage.toPng(document.getElementById('map'))
-        .then(function (dataUrl) {
-          var link = document.createElement('a');
-          link.download = map.printControl.options.documentTitle || "exportedMap.png";
-          link.href = dataUrl;
-          link.click();
-        })
-        .catch(function (error) {
-          console.error('Error exporting map as PNG:', error);
-        });
-    };
+		// Add browser print control with custom print function for saving as PNG
+		L.control.browserPrint({
+			documentTitle: "exportedMap",
+			printModes: [
+				L.BrowserPrint.Mode.Auto("Download PNG"),
+			],
+			printFunction: saveAsImage
+		}).addTo(map);
 
-    // Add browser print control with custom print function for saving as PNG
-    L.control.browserPrint({
-      documentTitle: "printImage",
-      printModes: [
-        L.BrowserPrint.Mode.Auto("Download PNG"),
-      ],
-      printFunction: saveAsImage
-    }).addTo(map);
-  </script>
+		// Add the legend to the print map when printing starts
+		map.on("browser-print-start", function(e){
+			L.control.legend({ position: 'bottomright' }).addTo(e.printMap);
+		});
+	</script>
 
 </body>
 </html>
