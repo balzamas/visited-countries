@@ -100,23 +100,10 @@
     }).addTo(map);
 
     // Trigger the export of the current view as an image
-
-    function exportMap() {
-        // Temporarily set map container height to fit content
-        document.getElementById('map').style.height = '100vh'; // Adjust height as needed for export
-        map.invalidateSize(); // Refresh map dimensions
-      
-        // Perform the export
-        printer.printMap('CurrentSize', 'TravelMap');
-      
-        // Restore original map height after export
-        document.getElementById('map').style.height = '100vh';
-        map.invalidateSize();
-      }
     
-//    function exportMap() {
-//      printer.printMap('CurrentSize', 'TravelMap');
-//    }
+    function exportMap() {
+      printer.printMap('CurrentSize', 'TravelMap');
+    }
 
     // Color scheme based on visit count
     function getColor(visits) {
