@@ -35,15 +35,30 @@
     .legend label {
       display: block;
     }
+    .export-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    .export-btn:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
+  <button class="export-btn" onclick="exportMap()">Export Map as Image</button>
   <div id="map"></div>
 
-  <!-- Include Leaflet, Leaflet.BigImage, and html2canvas -->
+  <!-- Include Leaflet and Leaflet.BigImage -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <script src="https://raw.githubusercontent.com/aratcliffe/Leaflet.bigImage/master/Leaflet.BigImage.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="Leaflet.BigImage.min.js"></script>
 
   <script>
     // Initialize the map
@@ -54,8 +69,7 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Add Leaflet.BigImage control
-    L.control.bigImage({ position: 'topright' }).addTo(map);
+    L.control.bigImage({position: 'bottomleft'}).addTo(map);
 
     // Color scheme based on visit count
     function getColor(visits) {
@@ -152,44 +166,19 @@
     };
     legend.addTo(map);
 
-    // Export function to combine the map and legend
-    function exportMapWithLegend() {
-      // Use Leaflet.BigImage to export the map
-      map.printControl._print().then(mapBlob => {
-        const mapImg = new Image();
-        mapImg.src = URL.createObjectURL(mapBlob);
-        
-        mapImg.onload = () => {
-          // Capture the legend using html2canvas
-          const legendContainer = document.querySelector('.legend');
-          html2canvas(legendContainer, { useCORS: true }).then(legendCanvas => {
-            // Create a combined canvas
-            const combinedCanvas = document.createElement('canvas');
-            combinedCanvas.width = mapImg.width;
-            combinedCanvas.height = mapImg.height;
-            const ctx = combinedCanvas.getContext('2d');
-
-            // Draw the map image onto the combined canvas
-            ctx.drawImage(mapImg, 0, 0);
-
-            // Position and draw the legend
-            const legendX = mapImg.width - legendCanvas.width - 20;
-            const legendY = 20;
-            ctx.drawImage(legendCanvas, legendX, legendY);
-
-            // Download the combined image
-            combinedCanvas.toBlob(blob => {
-              const link = document.createElement('a');
-              link.href = URL.createObjectURL(blob);
-              link.download = 'TravelMapWithLegend.png';
-              link.click();
-            });
-          });
-        };
+    // Set up the exportMap function using Leaflet.BigImage
+    function exportMap() {
+      L.bigImage({
+        dpi: 300,
+        outputFormat: 'image/png',
+        fileName: 'TravelMap.png'
+      }).printMap(map).then((blob) => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'TravelMap.png';
+        link.click();
       });
     }
   </script>
-
-  <button onclick="exportMapWithLegend()">Export Map with Legend</button>
 </body>
 </html>
