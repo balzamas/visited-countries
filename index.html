@@ -89,10 +89,20 @@
         useCORS: true,
         logging: true,
       }).then(canvas => {
-        let link = document.createElement('a');
-        link.href = canvas.toDataURL();
+        // Convert the canvas to a data URL
+        const dataURL = canvas.toDataURL("image/png");
+
+        // Create a temporary download link
+        const link = document.createElement('a');
+        link.href = dataURL;
         link.download = 'TravelMap.png';
+        
+        // Append the link, click it, and then remove it
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+      }).catch(error => {
+        console.error("Error capturing the map:", error);
       });
     }
 
