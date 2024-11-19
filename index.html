@@ -116,51 +116,50 @@
     function cropImage(originalCanvas) {
       const context = originalCanvas.getContext('2d');
       const { width, height } = originalCanvas;
-
-      // Get image data
+    
       const imageData = context.getImageData(0, 0, width, height).data;
-
-      let top = null, bottom = null, left = null, right = null;
-
-      // Find boundaries with non-transparent pixels
+    
+      let top = height, bottom = 0, left = width, right = 0;
+    
+      // Loop through each pixel to find the boundaries with non-transparent pixels
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           const alpha = imageData[(y * width + x) * 4 + 3];
-          if (alpha > 0) { // non-transparent pixel
-            if (top === null) top = y;
-            bottom = y;
-            if (left === null || x < left) left = x;
-            if (right === null || x > right) right = x;
+          if (alpha > 0) {
+            if (y < top) top = y;
+            if (y > bottom) bottom = y;
+            if (x < left) left = x;
+            if (x > right) right = x;
           }
         }
       }
-
-      // If no non-transparent pixels are found, exit
-      if (top === null) return;
-
-      // Crop the image based on the boundaries
+    
+      // If no boundaries are found, skip cropping
+      if (top === height || bottom === 0 || left === width || right === 0) return;
+    
       const croppedWidth = right - left + 1;
       const croppedHeight = bottom - top + 1;
-
+    
       // Create a new canvas to store the cropped image
       const croppedCanvas = document.createElement('canvas');
       croppedCanvas.width = croppedWidth;
       croppedCanvas.height = croppedHeight;
       const croppedContext = croppedCanvas.getContext('2d');
-
+    
       // Draw the cropped area onto the new canvas
       croppedContext.drawImage(
         originalCanvas,
-        left, top, croppedWidth, croppedHeight, // source
-        0, 0, croppedWidth, croppedHeight       // destination
+        left, top, croppedWidth, croppedHeight,
+        0, 0, croppedWidth, croppedHeight
       );
-
-      // Convert the cropped canvas to a PNG and download it
+    
+      // Convert the cropped canvas to an image and download it
       const link = document.createElement('a');
       link.download = 'CroppedTravelMap.png';
       link.href = croppedCanvas.toDataURL();
       link.click();
     }
+
 
     // Color scheme based on visit count
     function getColor(visits) {
