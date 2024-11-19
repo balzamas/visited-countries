@@ -14,15 +14,9 @@
     }
     #map {
       width: 100%;
-      height: 100vh; /* Full viewport height */
-      position: relative;
-      margin: 0;
-      padding: 0;
+      height: 100vh;
     }
     .legend {
-      position: absolute;
-      top: 10px;
-      right: 10px;
       background-color: white;
       padding: 10px;
       font-size: 14px;
@@ -30,7 +24,6 @@
       color: #555;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
     }
     .legend i {
       width: 18px;
@@ -61,17 +54,7 @@
 </head>
 <body>
   <button class="export-btn" onclick="exportMap()">Export Map as Image</button>
-  <div id="map">
-    <div class="legend">
-      <b>Visits:</b><br>
-      <label><i style="background:#d3d3d3"></i> None</label>
-      <label><i style="background:#ffeda0"></i> 1x</label>
-      <label><i style="background:#feb24c"></i> 2x</label>
-      <label><i style="background:#fd8d3c"></i> 3x</label>
-      <label><i style="background:#f03b20"></i> 4-6x</label>
-      <label><i style="background:#bd0026"></i> >6x</label>
-    </div>
-  </div>
+  <div id="map"></div>
 
   <!-- Include Leaflet and Leaflet.BigImage -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -91,17 +74,17 @@
     // Color scheme based on visit count
     function getColor(visits) {
       if (visits === 0 || visits == null) {
-        return '#d3d3d3'; // Gray color for no visits
+        return '#d3d3d3';
       } else if (visits === 1) {
-        return '#ffeda0'; // Light color for 1 visit
+        return '#ffeda0';
       } else if (visits === 2) {
-        return '#feb24c'; // Slightly darker for 2 visits
+        return '#feb24c';
       } else if (visits === 3) {
-        return '#fd8d3c'; // Darker for 3 visits
+        return '#fd8d3c';
       } else if (visits <= 6) {
-        return '#f03b20'; // Red for 4-6 visits
+        return '#f03b20';
       } else {
-        return '#bd0026'; // Dark red for more than 6 visits
+        return '#bd0026';
       }
     }
 
@@ -123,7 +106,7 @@
       geojsonLayer.eachLayer(function (layer) {
         if (layer.feature.properties.id === countryId) {
           layer.feature.properties.visits = visits;
-          layer.setStyle(style(layer.feature)); // Update the style based on the new visits count
+          layer.setStyle(style(layer.feature));
           localStorage.setItem('country_' + countryId, visits);
           layer.closePopup();
         }
@@ -167,6 +150,21 @@
           onEachFeature: onEachFeature
         }).addTo(map);
       });
+
+    // Custom Legend Control
+    var legend = L.control({ position: 'topright' });
+    legend.onAdd = function (map) {
+      var div = L.DomUtil.create('div', 'legend');
+      div.innerHTML = '<b>Visits:</b><br>' +
+        '<label><i style="background:#d3d3d3"></i> None</label>' +
+        '<label><i style="background:#ffeda0"></i> 1x</label>' +
+        '<label><i style="background:#feb24c"></i> 2x</label>' +
+        '<label><i style="background:#fd8d3c"></i> 3x</label>' +
+        '<label><i style="background:#f03b20"></i> 4-6x</label>' +
+        '<label><i style="background:#bd0026"></i> >6x</label>';
+      return div;
+    };
+    legend.addTo(map);
 
     // Set up the exportMap function using Leaflet.BigImage
     function exportMap() {
