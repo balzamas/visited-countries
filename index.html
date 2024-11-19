@@ -12,12 +12,12 @@
       padding: 0;
     }
     #map {
-        width: 100%;
-        height: 100vh; /* Full viewport height */
-        position: relative;
-        margin: 0;
-        padding: 0;
-      }
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      margin: 0;
+      padding: 0;
+    }
     .legend {
       position: absolute;
       top: 10px;
@@ -41,7 +41,7 @@
     .legend label {
       display: block;
     }
-    .export-btn {
+    .export-btn, .html2canvas-btn {
       position: absolute;
       top: 10px;
       left: 10px;
@@ -52,22 +52,16 @@
       border-radius: 5px;
       cursor: pointer;
       z-index: 1000;
+      margin-left: 10px;
     }
-    .export-btn:hover {
+    .export-btn:hover, .html2canvas-btn:hover {
       background-color: #45a049;
-    }
-    /* Hide the default leaflet-easyPrint button */
-    .leaflet-control-easyPrint-button {
-      display: none !important;
-    }
-    /* Move the zoom controls down */
-    .leaflet-top.leaflet-left .leaflet-control-zoom {
-      margin-top: 60px !important; /* Adjust this value as needed */
     }
   </style>
 </head>
 <body>
   <button class="export-btn" onclick="exportMap()">Export Map as Image</button>
+  <button class="html2canvas-btn" onclick="exportMapWithHtml2Canvas()">Export Map with Overlay</button>
   <div id="map">
     <div class="legend">
       <b>Visits:</b><br>
@@ -82,46 +76,52 @@
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     // Initialize the map
-    var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
+    var map = L.map('map').setView([51.505, 10.09], 4);
 
-    // Using OpenStreetMap tiles to avoid CORS issues
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Add EasyPrint control to the map
     var printer = L.easyPrint({
-      sizeModes: ['Current'], // Choose a preset size or try 'Current' for current map view
+      sizeModes: ['Current'],
       filename: 'TravelMap',
-      exportOnly: true, // Ensures that the button triggers an export only
-      hidden: true // Makes the plugin work silently in the background without extra controls
+      exportOnly: true,
+      hidden: true
     }).addTo(map);
 
-    // Trigger the export of the current view as an image
     function exportMap() {
       printer.printMap('CurrentSize', 'TravelMap');
+    }
+
+    function exportMapWithHtml2Canvas() {
+      html2canvas(document.getElementById('map')).then(canvas => {
+        var link = document.createElement('a');
+        link.download = 'TravelMapWithOverlay.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
     }
 
     // Color scheme based on visit count
     function getColor(visits) {
       if (visits === 0 || visits == null) {
-        return '#d3d3d3'; // Gray color for no visits
+        return '#d3d3d3';
       } else if (visits === 1) {
-        return '#ffeda0'; // Light color for 1 visit
+        return '#ffeda0';
       } else if (visits === 2) {
-        return '#feb24c'; // Slightly darker for 2 visits
+        return '#feb24c';
       } else if (visits === 3) {
-        return '#fd8d3c'; // Darker for 3 visits
+        return '#fd8d3c';
       } else if (visits <= 6) {
-        return '#f03b20'; // Red for 4-6 visits
+        return '#f03b20';
       } else {
-        return '#bd0026'; // Dark red for more than 6 visits
+        return '#bd0026';
       }
     }
 
-    // Style function for each country
     function style(feature) {
       var visits = feature.properties.visits || 0;
       return {
@@ -130,24 +130,21 @@
         opacity: 1,
         color: 'white',
         dashArray: '3',
-        fillOpacity: 0.7 // Fully opaque
+        fillOpacity: 0.7
       };
     }
 
-    // Function to set the number of visits and update the map
     function setVisits(countryId, visits) {
       geojsonLayer.eachLayer(function (layer) {
         if (layer.feature.properties.id === countryId) {
           layer.feature.properties.visits = visits;
-          layer.setStyle(style(layer.feature)); // Update the style based on the new visits count
-          // Store the visits data in localStorage
+          layer.setStyle(style(layer.feature));
           localStorage.setItem('country_' + countryId, visits);
-          layer.closePopup(); // Close the popup after selection
+          layer.closePopup();
         }
       });
     }
 
-    // When a country is clicked, allow the user to select how many times they visited
     function onEachFeature(feature, layer) {
       layer.on({
         click: function (e) {
@@ -166,13 +163,11 @@
       });
     }
 
-    // Load GeoJSON data and add to the map
     var geojsonUrl = 'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson';
     var geojsonLayer;
     fetch(geojsonUrl)
       .then(response => response.json())
       .then(data => {
-        // Assign unique IDs and load visits data from localStorage
         data.features.forEach((feature, index) => {
           feature.properties.id = index;
           var savedVisits = localStorage.getItem('country_' + feature.properties.id);
