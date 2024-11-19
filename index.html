@@ -11,12 +11,15 @@
       margin: 0;
       padding: 0;
     }
+    .map-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
     #map {
       width: 100%;
-      height: 100vh;
-      position: relative;
-      margin: 0;
-      padding: 0;
+      height: 100%;
     }
     .legend {
       position: absolute;
@@ -60,17 +63,19 @@
   </style>
 </head>
 <body>
-  <button class="export-btn" onclick="exportMap()">Export Map as Image</button>
-  <button class="html2canvas-btn" onclick="exportMapWithHtml2Canvas()">Export Map with Overlay</button>
-  <div id="map">
-    <div class="legend">
-      <b>Visits:</b><br>
-      <label><i style="background:#d3d3d3"></i> None</label>
-      <label><i style="background:#ffeda0"></i> 1x</label>
-      <label><i style="background:#feb24c"></i> 2x</label>
-      <label><i style="background:#fd8d3c"></i> 3x</label>
-      <label><i style="background:#f03b20"></i> 4-6x</label>
-      <label><i style="background:#bd0026"></i> >6x</label>
+  <div class="map-container">
+    <button class="export-btn" onclick="exportMap()">Export Map as Image</button>
+    <button class="html2canvas-btn" onclick="exportMapWithHtml2Canvas()">Export Map with Overlay</button>
+    <div id="map">
+      <div class="legend">
+        <b>Visits:</b><br>
+        <label><i style="background:#d3d3d3"></i> None</label>
+        <label><i style="background:#ffeda0"></i> 1x</label>
+        <label><i style="background:#feb24c"></i> 2x</label>
+        <label><i style="background:#fd8d3c"></i> 3x</label>
+        <label><i style="background:#f03b20"></i> 4-6x</label>
+        <label><i style="background:#bd0026"></i> >6x</label>
+      </div>
     </div>
   </div>
 
@@ -78,7 +83,6 @@
   <script src="https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
-    // Initialize the map
     var map = L.map('map').setView([51.505, 10.09], 4);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -97,7 +101,7 @@
     }
 
     function exportMapWithHtml2Canvas() {
-      html2canvas(document.getElementById('map')).then(canvas => {
+      html2canvas(document.querySelector(".map-container")).then(canvas => {
         var link = document.createElement('a');
         link.download = 'TravelMapWithOverlay.png';
         link.href = canvas.toDataURL();
@@ -105,7 +109,6 @@
       });
     }
 
-    // Color scheme based on visit count
     function getColor(visits) {
       if (visits === 0 || visits == null) {
         return '#d3d3d3';
