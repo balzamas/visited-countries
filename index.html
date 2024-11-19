@@ -85,6 +85,8 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
+    L.control.bigImage({position: 'topright'}).addTo(map);
+
     // Color scheme based on visit count
     function getColor(visits) {
       if (visits === 0 || visits == null) {
