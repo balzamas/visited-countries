@@ -13,8 +13,33 @@
     }
     #map {
       width: 100%;
-      height: 100vh;
+      height: 100vh; /* Full viewport height */
       position: relative;
+      margin: 0;
+      padding: 0;
+    }
+    .legend {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: white;
+      padding: 10px;
+      font-size: 14px;
+      line-height: 18px;
+      color: #555;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+    .legend i {
+      width: 18px;
+      height: 18px;
+      display: inline-block;
+      margin-right: 8px;
+      opacity: 0.7;
+    }
+    .legend label {
+      display: block;
     }
     .export-btn {
       position: absolute;
@@ -28,33 +53,59 @@
       cursor: pointer;
       z-index: 1000;
     }
+    .export-btn:hover {
+      background-color: #45a049;
+    }
+    /* Hide the default leaflet-easyPrint button */
+    .leaflet-control-easyPrint-button {
+      display: none !important;
+    }
+    /* Move the zoom controls down */
+    .leaflet-top.leaflet-left .leaflet-control-zoom {
+      margin-top: 60px !important; /* Adjust this value as needed */
+    }
   </style>
 </head>
 <body>
-  <button class="export-btn" onclick="exportAndCropMap()">Export Map as Cropped Image</button>
-  <div id="map"></div>
+  <button class="export-btn" onclick="exportMap()">Export Map as Image</button>
+  <div id="map">
+    <div class="legend">
+      <b>Visits:</b><br>
+      <label><i style="background:#d3d3d3"></i> None</label>
+      <label><i style="background:#ffeda0"></i> 1x</label>
+      <label><i style="background:#feb24c"></i> 2x</label>
+      <label><i style="background:#fd8d3c"></i> 3x</label>
+      <label><i style="background:#f03b20"></i> 4-6x</label>
+      <label><i style="background:#bd0026"></i> >6x</label>
+    </div>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js"></script>
   <script>
     // Initialize the map
-    var map = L.map('map').setView([51.505, 10.09], 4);
+    var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
 
-    // Using OpenStreetMap tiles
+    // Using OpenStreetMap tiles to avoid CORS issues
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // EasyPrint plugin for printing
+    // Add EasyPrint control to the map
     var printer = L.easyPrint({
-      sizeModes: ['Current'],
+      sizeModes: ['Current'], // Choose a preset size or try 'Current' for current map view
       filename: 'TravelMap',
-      exportOnly: true,
-      hidden: true
+      exportOnly: true, // Ensures that the button triggers an export only
+      hidden: true // Makes the plugin work silently in the background without extra controls
     }).addTo(map);
 
-    // Function to crop the image and save
-    function exportAndCropMap() {
+    // Trigger the export of the current view as an image
+//   function exportMap() {
+//      printer.printMap('CurrentSize', 'TravelMap');
+//    }
+
+     // Function to crop the image and save
+    function exportMap() {
       // Trigger EasyPrint to generate an image
       printer.printMap('CurrentSize', 'TravelMap', function(canvas) {
         cropImage(canvas);
@@ -110,6 +161,88 @@
       link.href = croppedCanvas.toDataURL();
       link.click();
     }
+
+    // Color scheme based on visit count
+    function getColor(visits) {
+      if (visits === 0 || visits == null) {
+        return '#d3d3d3'; // Gray color for no visits
+      } else if (visits === 1) {
+        return '#ffeda0'; // Light color for 1 visit
+      } else if (visits === 2) {
+        return '#feb24c'; // Slightly darker for 2 visits
+      } else if (visits === 3) {
+        return '#fd8d3c'; // Darker for 3 visits
+      } else if (visits <= 6) {
+        return '#f03b20'; // Red for 4-6 visits
+      } else {
+        return '#bd0026'; // Dark red for more than 6 visits
+      }
+    }
+
+    // Style function for each country
+    function style(feature) {
+      var visits = feature.properties.visits || 0;
+      return {
+        fillColor: getColor(visits),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7 // Fully opaque
+      };
+    }
+
+    // Function to set the number of visits and update the map
+    function setVisits(countryId, visits) {
+      geojsonLayer.eachLayer(function (layer) {
+        if (layer.feature.properties.id === countryId) {
+          layer.feature.properties.visits = visits;
+          layer.setStyle(style(layer.feature)); // Update the style based on the new visits count
+          // Store the visits data in localStorage
+          localStorage.setItem('country_' + countryId, visits);
+          layer.closePopup(); // Close the popup after selection
+        }
+      });
+    }
+
+    // When a country is clicked, allow the user to select how many times they visited
+    function onEachFeature(feature, layer) {
+      layer.on({
+        click: function (e) {
+          var popupContent = '<div><strong>' + feature.properties.name + '</strong><br>' +
+            'How many times have you visited?<br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 0)">No visits</button><br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 1)">1 visit</button><br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 2)">2 visits</button><br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 3)">3 visits</button><br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 4)">4-6 visits</button><br>' +
+            '<button onclick="setVisits(' + feature.properties.id + ', 7)">More than 6 visits</button>' +
+            '</div>';
+
+          layer.bindPopup(popupContent).openPopup();
+        }
+      });
+    }
+
+    // Load GeoJSON data and add to the map
+    var geojsonUrl = 'https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson';
+    var geojsonLayer;
+    fetch(geojsonUrl)
+      .then(response => response.json())
+      .then(data => {
+        // Assign unique IDs and load visits data from localStorage
+        data.features.forEach((feature, index) => {
+          feature.properties.id = index;
+          var savedVisits = localStorage.getItem('country_' + feature.properties.id);
+          if (savedVisits !== null) {
+            feature.properties.visits = parseInt(savedVisits);
+          }
+        });
+        geojsonLayer = L.geoJson(data, {
+          style: style,
+          onEachFeature: onEachFeature
+        }).addTo(map);
+      });
   </script>
 </body>
 </html>
