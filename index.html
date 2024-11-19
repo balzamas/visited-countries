@@ -82,6 +82,7 @@
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js"></script>
+  <script src="https://unpkg.com/leaflet-image@latest/leaflet-image.js"></script>
   <script>
     // Initialize the map
     var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
@@ -100,10 +101,26 @@
     }).addTo(map);
 
     // Trigger the export of the current view as an image
-    
     function exportMap() {
-      printer.printMap('CurrentSize', 'TravelMap');
+      leafletImage(map, function(err, canvas) {
+        if (err) {
+          console.error('Error exporting map:', err);
+          return;
+        }
+        
+        // Convert the canvas to a PNG image
+        const imgUrl = canvas.toDataURL('image/png');
+        
+        // Create a link to download the image
+        const downloadLink = document.createElement('a');
+        downloadLink.href = imgUrl;
+        downloadLink.download = 'TravelMap.png';
+        downloadLink.click();
+      });
     }
+//    function exportMap() {
+//      printer.printMap('CurrentSize', 'TravelMap');
+//    }
 
     // Color scheme based on visit count
     function getColor(visits) {
