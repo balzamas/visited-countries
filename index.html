@@ -44,6 +44,7 @@
   </style>
 </head>
 <body>
+  <!-- Map container with the legend placed inside -->
   <div id="map">
     <div class="legend" id="legend">
       <b>Visits:</b><br>
@@ -149,21 +150,11 @@
         }).addTo(map);
       });
 
-    // Move the legend inside the map container during print and revert after printing
+    // Add the browser print control to the map
     L.control.browserPrint({
-      title: 'Export Map as Image',
-      printModes: ["Portrait", "Landscape", "Auto", "Custom"],
-      closePopupsOnPrint: true,
-      onPrintStart: function() {
-        // Move the legend into the map for printing
-        const mapContainer = document.getElementById('map');
-        const legend = document.getElementById('legend');
-        mapContainer.appendChild(legend);
-      },
-      onPrintEnd: function() {
-        // Return the legend to its original position after printing
-        document.body.appendChild(document.getElementById('legend'));
-      }
+      title: 'Export Map as Image', // Tooltip text for the button
+      printModes: ["Portrait", "Landscape", "Auto", "Custom"], // Available print modes
+      closePopupsOnPrint: true // Close any open popups before printing
     }).addTo(map);
   </script>
 </body>
