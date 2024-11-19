@@ -41,18 +41,11 @@
     .legend label {
       display: block;
     }
-    /* Ensuring the legend is visible during print */
-    @media print {
-      .legend {
-        position: static;
-        display: block;
-      }
-    }
   </style>
 </head>
 <body>
   <div id="map">
-    <div class="legend">
+    <div class="legend" id="legend">
       <b>Visits:</b><br>
       <label><i style="background:#d3d3d3"></i> None</label>
       <label><i style="background:#ffeda0"></i> 1x</label>
@@ -156,19 +149,20 @@
         }).addTo(map);
       });
 
-    // Add the browser print control to the map and include the legend in the print view
+    // Move the legend inside the map container during print and revert after printing
     L.control.browserPrint({
-      title: 'Export Map as Image', // Tooltip text for the button
-      printModes: ["Portrait", "Landscape", "Auto", "Custom"], // Available print modes
-      closePopupsOnPrint: true, // Close any open popups before printing
-      printObjects: {
-        printLayer: map, // The map layer to print
-        printElements: [
-          {
-            html: document.querySelector('.legend'), // Include the legend in the print view
-            useOverlay: true // Make sure the legend overlays on the map when printed
-          }
-        ]
+      title: 'Export Map as Image',
+      printModes: ["Portrait", "Landscape", "Auto", "Custom"],
+      closePopupsOnPrint: true,
+      onPrintStart: function() {
+        // Move the legend into the map for printing
+        const mapContainer = document.getElementById('map');
+        const legend = document.getElementById('legend');
+        mapContainer.appendChild(legend);
+      },
+      onPrintEnd: function() {
+        // Return the legend to its original position after printing
+        document.body.appendChild(document.getElementById('legend'));
       }
     }).addTo(map);
   </script>
