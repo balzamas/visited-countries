@@ -12,12 +12,12 @@
       padding: 0;
     }
     #map {
-      width: 100%;
-      height: 90vh; /* Full viewport height */
-      position: relative;
-      margin: 0;
-      padding: 0;
-    }
+        width: 100%;
+        height: 100vh; /* Full viewport height */
+        position: relative;
+        margin: 0;
+        padding: 0;
+      }
     .legend {
       position: absolute;
       top: 10px;
@@ -44,7 +44,7 @@
     .export-btn {
       position: absolute;
       top: 10px;
-      left: 50px; /* Move button 50px to the right */
+      left: 10px;
       padding: 10px 20px;
       background-color: #4CAF50;
       color: white;
@@ -55,6 +55,14 @@
     }
     .export-btn:hover {
       background-color: #45a049;
+    }
+    /* Hide the default leaflet-easyPrint button */
+    .leaflet-control-easyPrint-button {
+      display: none !important;
+    }
+    /* Move the zoom controls down */
+    .leaflet-top.leaflet-left .leaflet-control-zoom {
+      margin-top: 60px !important; /* Adjust this value as needed */
     }
   </style>
 </head>
@@ -73,7 +81,7 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js"></script>
   <script>
     // Initialize the map
     var map = L.map('map').setView([51.505, 10.09], 4); // Centered in Europe
@@ -83,27 +91,17 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Export map using html2canvas
-    function exportMap() {
-      html2canvas(document.getElementById('map'), {
-        useCORS: true,
-        logging: true,
-      }).then(canvas => {
-        // Convert the canvas to a data URL
-        const dataURL = canvas.toDataURL("image/png");
+    // Add EasyPrint control to the map
+    var printer = L.easyPrint({
+      sizeModes: ['Current'], // Choose a preset size or try 'Current' for current map view
+      filename: 'TravelMap',
+      exportOnly: true, // Ensures that the button triggers an export only
+      hidden: true // Makes the plugin work silently in the background without extra controls
+    }).addTo(map);
 
-        // Create a temporary download link
-        const link = document.createElement('a');
-        link.href = dataURL;
-        link.download = 'TravelMap.png';
-        
-        // Append the link, click it, and then remove it
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }).catch(error => {
-        console.error("Error capturing the map:", error);
-      });
+    // Trigger the export of the current view as an image
+    function exportMap() {
+      printer.printMap('CurrentSize', 'TravelMap');
     }
 
     // Color scheme based on visit count
