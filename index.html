@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Travel Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-  <link rel="stylesheet" href="Leaflet.BigImage.min.css">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -42,25 +41,9 @@
     .legend label {
       display: block;
     }
-    .export-btn {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1000;
-    }
-    .export-btn:hover {
-      background-color: #45a049;
-    }
   </style>
 </head>
 <body>
-  <button class="export-btn" onclick="exportMap()">Export Map as Image</button>
   <div id="map">
     <div class="legend">
       <b>Visits:</b><br>
@@ -73,9 +56,9 @@
     </div>
   </div>
 
-  <!-- Include Leaflet and Leaflet.BigImage -->
+  <!-- Include Leaflet and leaflet.browser.print -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <script src="Leaflet.BigImage.min.js"></script>
+  <script src="https://unpkg.com/leaflet.browser.print/dist/leaflet.browser.print.min.js"></script>
 
   <script>
     // Initialize the map
@@ -85,8 +68,6 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-
-    L.control.bigImage({position: 'bottomleft'}).addTo(map);
 
     // Color scheme based on visit count
     function getColor(visits) {
@@ -168,19 +149,12 @@
         }).addTo(map);
       });
 
-    // Set up the exportMap function using Leaflet.BigImage
-    function exportMap() {
-      L.bigImage({
-        dpi: 300,
-        outputFormat: 'image/png',
-        fileName: 'TravelMap.png'
-      }).printMap(map).then((blob) => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'TravelMap.png';
-        link.click();
-      });
-    }
+    // Add the browser print control to the map
+    L.control.browserPrint({
+      title: 'Export Map as Image', // Tooltip text for the button
+      printModes: ["Portrait", "Landscape", "Auto", "Custom"], // Available print modes
+      closePopupsOnPrint: true // Close any open popups before printing
+    }).addTo(map);
   </script>
 </body>
 </html>
