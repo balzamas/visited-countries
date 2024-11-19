@@ -6,15 +6,24 @@
   <title>Travel Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    body, html {
+      width: 100%;
+      height: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
     }
-    #map {
+    .map-wrapper {
+      position: relative;
       width: 100vw;
       height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
     }
     .legend {
       position: absolute;
@@ -58,17 +67,19 @@
   </style>
 </head>
 <body>
-  <button class="export-btn" onclick="exportMap()">Export Map as Image</button>
-  <button class="html2canvas-btn" onclick="exportMapWithHtml2Canvas()">Export Map with Overlay</button>
-  <div id="map">
-    <div class="legend">
-      <b>Visits:</b><br>
-      <label><i style="background:#d3d3d3"></i> None</label>
-      <label><i style="background:#ffeda0"></i> 1x</label>
-      <label><i style="background:#feb24c"></i> 2x</label>
-      <label><i style="background:#fd8d3c"></i> 3x</label>
-      <label><i style="background:#f03b20"></i> 4-6x</label>
-      <label><i style="background:#bd0026"></i> >6x</label>
+  <div class="map-wrapper">
+    <button class="export-btn" onclick="exportMap()">Export Map as Image</button>
+    <button class="html2canvas-btn" onclick="exportMapWithHtml2Canvas()">Export Map with Overlay</button>
+    <div id="map">
+      <div class="legend">
+        <b>Visits:</b><br>
+        <label><i style="background:#d3d3d3"></i> None</label>
+        <label><i style="background:#ffeda0"></i> 1x</label>
+        <label><i style="background:#feb24c"></i> 2x</label>
+        <label><i style="background:#fd8d3c"></i> 3x</label>
+        <label><i style="background:#f03b20"></i> 4-6x</label>
+        <label><i style="background:#bd0026"></i> >6x</label>
+      </div>
     </div>
   </div>
 
@@ -94,11 +105,9 @@
     }
 
     function exportMapWithHtml2Canvas() {
-      html2canvas(document.getElementById('map'), {
+      html2canvas(document.body, {
         useCORS: true,
-        scale: 2, // Increase scale for higher resolution
-        x: 0, // Reset x-offset
-        y: 0  // Reset y-offset
+        scale: 2
       }).then(canvas => {
         var link = document.createElement('a');
         link.download = 'TravelMapWithOverlay.png';
