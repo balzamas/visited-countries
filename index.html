@@ -54,12 +54,6 @@
     .export-btn:hover {
       background-color: #45a049;
     }
-    .leaflet-control-easyPrint-button {
-      display: none !important;
-    }
-    .leaflet-control-zoom {
-      margin-top: 60px; /* Adjust this value as needed */
-    }
   </style>
 </head>
 <body>
@@ -92,8 +86,21 @@
       sizeModes: ['Current'], // Adjust to current view
       filename: 'TravelMap',
       exportOnly: true, // Ensures that the button triggers an export only
-      hideControlContainer: true
     }).addTo(map);
+
+    // Remove the default print button after it is added
+    map.on('load', function () {
+      const printButton = document.querySelector('.leaflet-control-easyPrint-button');
+      if (printButton) {
+        printButton.style.display = 'none';
+      }
+
+      // Move zoom control down
+      const zoomControl = document.querySelector('.leaflet-control-zoom');
+      if (zoomControl) {
+        zoomControl.style.top = '60px'; // Adjust the top margin as needed
+      }
+    });
 
     // Trigger the export of the current view as an image
     function exportMap() {
