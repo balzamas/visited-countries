@@ -85,7 +85,8 @@
     var printer = L.easyPrint({
       sizeModes: ['Current'], // Adjust to current view
       filename: 'TravelMap',
-      exportOnly: true // Ensures that the button triggers an export only
+      exportOnly: true, // Ensures that the button triggers an export only
+      hideControlContainer: true
     }).addTo(map);
 
     // Trigger the export of the current view as an image
